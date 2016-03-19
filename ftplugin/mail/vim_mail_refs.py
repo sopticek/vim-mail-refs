@@ -16,6 +16,17 @@ def add_ref(buffer, window, ref_url):
     _set_cursor_pos(window, row, col)
 
 
+def _append_ref_url(buffer, ref_url):
+    '''Appends ref_url to the list of references at the end of the buffer.
+    '''
+    refs = _get_refs_with_urls(buffer)
+    ref = '[{}]'.format(len(refs) + 1)
+    if not refs:
+        buffer.append('')
+    buffer.append('{} {}'.format(ref, ref_url))
+    return ref
+
+
 def _insert_ref(buffer, row, col, ref):
     '''Inserts the reference into the current line in the buffer.
     '''
@@ -32,17 +43,6 @@ def _insert_ref(buffer, row, col, ref):
         line[col:]
     )
     return row, col + len(ref)
-
-
-def _append_ref_url(buffer, ref_url):
-    '''Appends ref_url to the list of references at the end of the buffer.
-    '''
-    refs = _get_refs_with_urls(buffer)
-    ref = '[{}]'.format(len(refs) + 1)
-    if not refs:
-        buffer.append('')
-    buffer.append('{} {}'.format(ref, ref_url))
-    return ref
 
 
 def _prepare_line_for_ref_insert(line, col):
