@@ -89,3 +89,79 @@ class AddRefTests(unittest.TestCase):
             ]
         )
         self.assertEqual(self.window.cursor, (2, 15))
+
+    def test_space_is_added_before_ref_when_cursor_is_on_word_end(self):
+        buffer = ['look at.']
+        #                ^
+        self.window.cursor = (1, 6)
+        ref_url = 'URL'
+
+        add_ref(buffer, self.window, ref_url)
+
+        self.assertEqual(
+            buffer,
+            [
+                'look at [1].',
+                #          ^
+                '',
+                '[1] URL'
+            ]
+        )
+        self.assertEqual(self.window.cursor, (1, 10))
+
+    def test_ref_is_added_correctly_when_cursor_is_inside_word(self):
+        buffer = ['look at.']
+        #               ^
+        self.window.cursor = (1, 5)
+        ref_url = 'URL'
+
+        add_ref(buffer, self.window, ref_url)
+
+        self.assertEqual(
+            buffer,
+            [
+                'look at [1].',
+                #          ^
+                '',
+                '[1] URL'
+            ]
+        )
+        self.assertEqual(self.window.cursor, (1, 10))
+
+    def test_ref_is_added_correctly_when_cursor_is_at_period(self):
+        buffer = ['look at.']
+        #                 ^
+        self.window.cursor = (1, 7)
+        ref_url = 'URL'
+
+        add_ref(buffer, self.window, ref_url)
+
+        self.assertEqual(
+            buffer,
+            [
+                'look at [1].',
+                #          ^
+                '',
+                '[1] URL'
+            ]
+        )
+        self.assertEqual(self.window.cursor, (1, 10))
+
+    def test_does_not_add_redundant_space(self):
+        buffer = ['look at .']
+        #                  ^
+        self.window.cursor = (1, 8)
+        ref_url = 'URL'
+
+        add_ref(buffer, self.window, ref_url)
+
+        self.assertEqual(
+            buffer,
+            [
+                'look at [1].',
+                #          ^
+                '',
+                '[1] URL'
+            ]
+        )
+        self.assertEqual(self.window.cursor, (1, 10))

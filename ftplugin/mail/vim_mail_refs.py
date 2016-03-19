@@ -14,13 +14,18 @@ def add_ref(buffer, window, ref_url):
 
 
 def _insert_ref(buffer, row, col, ref):
-    current_line = buffer[row]
-    before_pos = current_line[:col + 1]
-    after_pos = current_line[col + 1:]
-    new_line = before_pos + ref + after_pos
-    buffer[row] = new_line
-    if col == 0:
-        col = -1
+    line = buffer[row]
+
+    if not line:
+        buffer[row] = ref
+        return row, col + len(ref) - 1
+
+    line, col = _prepare_line_for_ref_insert(line, col)
+    buffer[row] = '{} {}{}'.format(
+        line[:col],
+        ref,
+        line[col:]
+    )
     return row, col + len(ref)
 
 
@@ -31,6 +36,22 @@ def _append_ref_url(buffer, ref_url):
         buffer.append('')
     buffer.append('{} {}'.format(ref, ref_url))
     return ref
+
+
+def _prepare_line_for_ref_insert(line, col):
+    # Get to the first non-alpha character.
+    while col < len(line) and line[col].isalpha():
+        col += 1
+
+    # Get to the leftmost space.
+    while col > 0 and line[col - 1].isspace():
+        col -= 1
+
+    # Remove all spaces.
+    while col < len(line) and line[col].isspace():
+        line = line[:col] + line[col + 1:]
+
+    return line, col
 
 
 def _get_refs_with_urls(buffer):
