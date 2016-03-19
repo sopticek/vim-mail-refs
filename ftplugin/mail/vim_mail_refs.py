@@ -128,4 +128,7 @@ def _add_signature(buffer, signature):
 
     if buffer[-1] != '':
         buffer.append('')
-    buffer.extend(signature)
+
+    # We cannot use buffer.extend() because Vim buffers do not support it.
+    for line in signature:
+        buffer.append(line)
