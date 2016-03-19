@@ -165,3 +165,28 @@ class AddRefTests(unittest.TestCase):
             ]
         )
         self.assertEqual(self.window.cursor, (1, 10))
+
+    def test_uses_existing_ref_when_url_has_already_been_added(self):
+        buffer = [
+            'look at [1].',
+            'Also look at .',
+            #            ^
+            '',
+            '[1] URL1'
+        ]
+        self.window.cursor = (2, 12)
+        ref_url = 'URL1'
+
+        add_ref(buffer, self.window, ref_url)
+
+        self.assertEqual(
+            buffer,
+            [
+                'look at [1].',
+                'Also look at [1].',
+                #               ^
+                '',
+                '[1] URL1'
+            ]
+        )
+        self.assertEqual(self.window.cursor, (2, 15))

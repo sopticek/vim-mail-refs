@@ -20,10 +20,12 @@ def _append_ref_url(buffer, ref_url):
     '''Appends ref_url to the list of references at the end of the buffer.
     '''
     refs = _get_refs_with_urls(buffer)
-    ref = '[{}]'.format(len(refs) + 1)
     if not refs:
         buffer.append('')
-    buffer.append('{} {}'.format(ref, ref_url))
+
+    ref, ref_exists = _get_ref_for_url(refs, ref_url)
+    if not ref_exists:
+        buffer.append('{} {}'.format(ref, ref_url))
     return ref
 
 
@@ -74,6 +76,15 @@ def _get_refs_with_urls(buffer):
             break
         refs.append(m.groups())
     return refs
+
+
+def _get_ref_for_url(refs, ref_url):
+    '''Returns (ref, ref_exists) for ref_url based on existing refs.
+    '''
+    for ref, url in refs:
+        if url == ref_url:
+            return ref, True
+    return '[{}]'.format(len(refs) + 1), False
 
 
 def _get_cursor_pos(window):
