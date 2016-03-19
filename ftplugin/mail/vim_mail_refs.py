@@ -20,8 +20,7 @@ def _append_ref_url(buffer, ref_url):
     '''Appends ref_url to the list of references at the end of the buffer.
     '''
     refs = _get_refs_with_urls(buffer)
-    if not refs:
-        buffer.append('')
+    _add_empty_line_before_ref_list_if_needed(buffer, refs)
 
     ref, ref_exists = _get_ref_for_url(refs, ref_url)
     if not ref_exists:
@@ -94,3 +93,15 @@ def _get_cursor_pos(window):
 
 def _set_cursor_pos(window, row, col):
     window.cursor = (row + 1, col)
+
+
+def _add_empty_line_before_ref_list_if_needed(buffer, refs):
+    # When there already are references, the empty line has already been added.
+    if refs:
+        return
+
+    # When there already is an empty line, do not add another one.
+    if len(buffer) >= 2 and buffer[-1] == '':
+        return
+
+    buffer.append('')
