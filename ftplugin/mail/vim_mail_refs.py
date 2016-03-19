@@ -11,8 +11,10 @@ def add_ref(buffer, window, ref_url):
     the end of the buffer.
     '''
     row, col = _get_cursor_pos(window)
+    signature = _remove_signature(buffer)
     ref = _append_ref_url(buffer, ref_url)
     row, col = _insert_ref(buffer, row, col, ref)
+    _add_signature(buffer, signature)
     _set_cursor_pos(window, row, col)
 
 
@@ -105,3 +107,25 @@ def _add_empty_line_before_ref_list_if_needed(buffer, refs):
         return
 
     buffer.append('')
+
+
+def _remove_signature(buffer):
+    for i, line in enumerate(reversed(buffer)):
+        if line == '--':
+            break
+    else:  # No break.
+        return []
+
+    sig_slice = slice(-(i + 1), len(buffer))
+    signature = buffer[sig_slice]
+    del buffer[sig_slice]
+    return signature
+
+
+def _add_signature(buffer, signature):
+    if not signature:
+        return
+
+    if buffer[-1] != '':
+        buffer.append('')
+    buffer.extend(signature)

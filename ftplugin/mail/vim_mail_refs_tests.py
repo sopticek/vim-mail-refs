@@ -212,3 +212,56 @@ class AddRefTests(unittest.TestCase):
             ]
         )
         self.assertEqual(self.window.cursor, (1, 10))
+
+    def test_reference_list_is_placed_before_signature(self):
+        buffer = [
+            'look at ',
+            #       ^
+            '--',
+            'Signature'
+        ]
+        self.window.cursor = (1, 7)
+        ref_url = 'URL'
+
+        add_ref(buffer, self.window, ref_url)
+
+        self.assertEqual(
+            buffer,
+            [
+                'look at [1]',
+                #          ^
+                '',
+                '[1] URL',
+                '',
+                '--',
+                'Signature'
+            ]
+        )
+        self.assertEqual(self.window.cursor, (1, 10))
+
+    def test_does_not_add_redundant_empty_line_before_signature(self):
+        buffer = [
+            'look at ',
+            #       ^
+            '',
+            '--',
+            'Signature'
+        ]
+        self.window.cursor = (1, 7)
+        ref_url = 'URL'
+
+        add_ref(buffer, self.window, ref_url)
+
+        self.assertEqual(
+            buffer,
+            [
+                'look at [1]',
+                #          ^
+                '',
+                '[1] URL',
+                '',
+                '--',
+                'Signature'
+            ]
+        )
+        self.assertEqual(self.window.cursor, (1, 10))
