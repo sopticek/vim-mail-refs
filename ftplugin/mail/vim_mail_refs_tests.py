@@ -377,3 +377,58 @@ class NormMailRefsTests(unittest.TestCase):
             ]
         )
         self.assertEqual(self.window.cursor, (1, 5))
+
+    def test_keeps_standalone_reference_on_line(self):
+        buffer = [
+            '[1]',
+            #  ^
+            '',
+            '[1] URL1'
+        ]
+        self.window.cursor = (1, 2)
+        orig_buffer = buffer[:]
+
+        norm_mail_refs(buffer, self.window)
+
+        self.assertEqual(buffer, orig_buffer)
+        self.assertEqual(self.window.cursor, (1, 2))
+
+    def test_does_not_consider_subscripts_in_code_as_references(self):
+        buffer = [
+            'Hello!',
+            #     ^
+            '[1][0]',
+            'x[2] = 2',
+            'x1[3] = 3',
+            'x_[4] = 4',
+            'range(10)[5]',
+            'x = [0, 1, 2, 3, 4, 5, 6][6]',
+            '[0, 1, 2, 3, 4, 5, 6, 7][7]',
+            '',
+            '[1] URL1',
+            '[2] URL2',
+            '[3] URL3',
+            '[4] URL4',
+            '[5] URL5',
+            '[6] URL6',
+            '[7] URL7'
+        ]
+        self.window.cursor = (1, 5)
+
+        norm_mail_refs(buffer, self.window)
+
+        self.assertEqual(
+            buffer,
+            [
+                'Hello!',
+                #     ^
+                '[1][0]',
+                'x[2] = 2',
+                'x1[3] = 3',
+                'x_[4] = 4',
+                'range(10)[5]',
+                'x = [0, 1, 2, 3, 4, 5, 6][6]',
+                '[0, 1, 2, 3, 4, 5, 6, 7][7]'
+            ]
+        )
+        self.assertEqual(self.window.cursor, (1, 5))

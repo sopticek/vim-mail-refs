@@ -9,6 +9,15 @@ import re
 # Regular expression matching the start of a mail signature.
 SIGNATURE_START_RE = r'^--\s*$'
 
+# Regular expression matching reference in text.
+REF_RE = re.compile(
+    r'''
+    (?<!\w|\]|\)) # What cannot be before reference.
+    (\[\d+\])     # Format of reference.
+    (?!\[)        # What cannot be after reference.
+    ''', re.VERBOSE
+)
+
 
 def add_ref(buffer, window, ref_url):
     '''Adds a reference to ref_url into the buffer, including adding ref_url to
@@ -32,6 +41,7 @@ def norm_mail_refs(buffer, window):
     signature = _remove_signature(buffer)
     _remove_trailing_empty_lines(buffer)
     _remove_unused_refs_with_urls(buffer)
+    _remove_trailing_empty_lines(buffer)
     _add_signature(buffer, signature)
 
 
@@ -183,7 +193,7 @@ def _get_used_refs(buffer):
 
 
 def _get_used_refs_in_line(line):
-    return set(re.findall(r'\[\d+\]', line))
+    return set(re.findall(REF_RE, line))
 
 
 def _add_block(buffer, lines):
