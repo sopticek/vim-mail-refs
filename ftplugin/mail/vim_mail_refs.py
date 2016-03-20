@@ -126,15 +126,8 @@ def _set_cursor_pos(window, row, col):
 
 
 def _add_empty_line_before_ref_list_if_needed(buffer, refs):
-    # When there already are references, the empty line has already been added.
-    if refs:
-        return
-
-    # When there already is an empty line, do not add another one.
-    if len(buffer) >= 2 and not buffer[-1]:
-        return
-
-    buffer.append('')
+    if not refs:
+        buffer.append('')
 
 
 def _remove_signature(buffer):
