@@ -2,6 +2,7 @@ import unittest
 from unittest import mock
 
 from vim_mail_refs import add_ref
+from vim_mail_refs import norm_mail_refs
 
 
 class AddRefTests(unittest.TestCase):
@@ -291,3 +292,88 @@ class AddRefTests(unittest.TestCase):
             ]
         )
         self.assertEqual(self.window.cursor, (1, 10))
+
+
+class NormMailRefsTests(unittest.TestCase):
+    def setUp(self):
+        self.window = mock.Mock()
+
+    def test_does_nothing_when_there_is_nothing_to_be_done(self):
+        buffer = [
+            'look at [1].',
+            'Also look at [2].',
+            #               ^
+            '',
+            '[1] URL1',
+            '[2] URL2',
+            '',
+            '-- ',
+            'Signature'
+        ]
+        self.window.cursor = (2, 15)
+        orig_buffer = buffer[:]
+
+        norm_mail_refs(buffer, self.window)
+
+        self.assertEqual(buffer, orig_buffer)
+        self.assertEqual(self.window.cursor, (2, 15))
+
+    def test_unused_references_are_removed(self):
+        buffer = [
+            'look at [1].',
+            'Also look at the sky.',
+            #               ^
+            '',
+            '[1] URL1',
+            '[2] URL2',
+            '[3] URL3',
+            '',
+            '-- ',
+            'Signature'
+        ]
+        self.window.cursor = (2, 15)
+
+        norm_mail_refs(buffer, self.window)
+
+        self.assertEqual(
+            buffer,
+            [
+                'look at [1].',
+                'Also look at the sky.',
+                #               ^
+                '',
+                '[1] URL1',
+                '',
+                '-- ',
+                'Signature'
+            ]
+        )
+        self.assertEqual(self.window.cursor, (2, 15))
+
+    def test_empty_lines_are_squashed_into_one(self):
+        buffer = [
+            'Hello!',
+            #     ^
+            '',
+            '[1] URL1',
+            '[2] URL2',
+            '[3] URL3',
+            '',
+            '-- ',
+            'Signature'
+        ]
+        self.window.cursor = (1, 5)
+
+        norm_mail_refs(buffer, self.window)
+
+        self.assertEqual(
+            buffer,
+            [
+                'Hello!',
+                #     ^
+                '',
+                '-- ',
+                'Signature'
+            ]
+        )
+        self.assertEqual(self.window.cursor, (1, 5))

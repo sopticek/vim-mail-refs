@@ -20,6 +20,18 @@ END
 
 endfunction
 
+function! NormMailRefs()
+
+python3 << END
+norm_mail_refs(
+	vim.current.buffer,
+	vim.current.window
+)
+END
+
+endfunction
+
 command! AddMailRef call AddMailRef()
+command! NormMailRefs call NormMailRefs()
 
 let loaded_vim_mail_refs = 1

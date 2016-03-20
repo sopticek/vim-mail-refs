@@ -23,6 +23,18 @@ def add_ref(buffer, window, ref_url):
     _set_cursor_pos(window, row, col)
 
 
+def norm_mail_refs(buffer, window):
+    '''Normalizes all references used in the buffer.
+
+    The following normalizations are performed:
+    - unused references are removed
+    '''
+    signature = _remove_signature(buffer)
+    _remove_trailing_empty_lines(buffer)
+    _remove_unused_refs_with_urls(buffer)
+    _add_signature(buffer, signature)
+
+
 def _append_ref_url(buffer, ref_url):
     '''Appends ref_url to the list of references at the end of the buffer.
     '''
@@ -148,3 +160,35 @@ def _remove_trailing_empty_lines(buffer):
             break
 
     del buffer[-i:]
+
+
+def _remove_unused_refs_with_urls(buffer):
+    refs_with_urls = _remove_refs_with_urls(buffer)
+    used_refs = _get_used_refs(buffer)
+    new_refs_with_urls = [
+        (ref, url) for ref, url in refs_with_urls if ref in used_refs
+    ]
+    _add_refs_with_urls(buffer, new_refs_with_urls)
+
+
+def _remove_refs_with_urls(buffer):
+    refs = _get_refs_with_urls(buffer)
+    if refs:
+        del buffer[-len(refs):]
+    return refs
+
+
+def _add_refs_with_urls(buffer, refs_with_urls):
+    for ref_with_url in refs_with_urls:
+        buffer.append(' '.join(ref_with_url))
+
+
+def _get_used_refs(buffer):
+    used_refs = set()
+    for line in buffer:
+        used_refs |= _get_used_refs_in_line(line)
+    return used_refs
+
+
+def _get_used_refs_in_line(line):
+    return set(re.findall(r'\[\d+\]', line))
