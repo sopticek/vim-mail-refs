@@ -1,3 +1,7 @@
+if !has("python3")
+	finish
+endif
+
 python3 import sys
 python3 import vim
 python3 sys.path.append(vim.eval('expand("<sfile>:h")'))
