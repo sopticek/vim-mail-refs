@@ -432,3 +432,43 @@ class NormMailRefsTests(unittest.TestCase):
             ]
         )
         self.assertEqual(self.window.cursor, (1, 5))
+
+    def test_cursor_is_at_start_of_prev_line_when_col_no_longer_exists(self):
+        buffer = [
+            'Hi!',
+            'Hello!',
+            '[1] URL1'
+            #       ^
+        ]
+        self.window.cursor = (3, 7)
+
+        norm_mail_refs(buffer, self.window)
+
+        self.assertEqual(
+            buffer,
+            [
+                'Hi!',
+                'Hello!'
+                #^
+            ]
+        )
+        self.assertEqual(self.window.cursor, (2, 0))
+
+    def test_cursor_is_at_prev_line_at_same_col_when_col_exists(self):
+        buffer = [
+            'Hello!',
+            '[1] URL1'
+            #    ^
+        ]
+        self.window.cursor = (2, 4)
+
+        norm_mail_refs(buffer, self.window)
+
+        self.assertEqual(
+            buffer,
+            [
+                'Hello!'
+                #    ^
+            ]
+        )
+        self.assertEqual(self.window.cursor, (1, 4))

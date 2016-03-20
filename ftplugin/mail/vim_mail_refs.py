@@ -42,6 +42,7 @@ def norm_mail_refs(buffer, window):
     _remove_trailing_empty_lines(buffer)
     _remove_unused_refs_with_urls(buffer)
     _remove_trailing_empty_lines(buffer)
+    _put_cursor_at_valid_pos(buffer, window)
     _add_signature(buffer, signature)
 
 
@@ -206,3 +207,16 @@ def _add_block(buffer, lines):
     # We cannot use buffer.extend() because Vim buffers do not support it.
     for line in lines:
         buffer.append(line)
+
+
+def _put_cursor_at_valid_pos(buffer, window):
+    row, col = _get_cursor_pos(window)
+    if row < len(buffer) and col < len(buffer[row]):
+        return
+
+    # We have to put the cursor at a valid position.
+    row = len(buffer) - 1
+    if col >= len(buffer[row]):
+        col = 0
+
+    _set_cursor_pos(window, row, col)
