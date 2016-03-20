@@ -1,4 +1,4 @@
-if !has("python3") || exists('loaded_vim_mail_refs')
+if !has('python3') || exists('loaded_vim_mail_refs')
 	finish
 endif
 
