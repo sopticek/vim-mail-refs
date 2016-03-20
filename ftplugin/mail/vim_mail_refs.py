@@ -140,15 +140,7 @@ def _remove_signature(buffer):
 
 
 def _add_signature(buffer, signature):
-    if not signature:
-        return
-
-    if buffer[-1]:
-        buffer.append('')
-
-    # We cannot use buffer.extend() because Vim buffers do not support it.
-    for line in signature:
-        buffer.append(line)
+    _add_block(buffer, signature)
 
 
 def _remove_trailing_empty_lines(buffer):
@@ -179,8 +171,8 @@ def _remove_refs_with_urls(buffer):
 
 
 def _add_refs_with_urls(buffer, refs_with_urls):
-    for ref_with_url in refs_with_urls:
-        buffer.append(' '.join(ref_with_url))
+    lines = [' '.join(ref_with_url) for ref_with_url in refs_with_urls]
+    _add_block(buffer, lines)
 
 
 def _get_used_refs(buffer):
@@ -192,3 +184,15 @@ def _get_used_refs(buffer):
 
 def _get_used_refs_in_line(line):
     return set(re.findall(r'\[\d+\]', line))
+
+
+def _add_block(buffer, lines):
+    if not lines:
+        return
+
+    if buffer[-1]:
+        buffer.append('')
+
+    # We cannot use buffer.extend() because Vim buffers do not support it.
+    for line in lines:
+        buffer.append(line)
