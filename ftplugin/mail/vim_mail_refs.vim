@@ -23,7 +23,7 @@ endfunction
 function! NormMailRefs()
 
 python3 << END
-norm_mail_refs(
+vim_mail_refs.norm_mail_refs(
 	vim.current.buffer,
 	vim.current.window
 )
