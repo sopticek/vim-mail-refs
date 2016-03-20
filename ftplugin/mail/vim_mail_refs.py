@@ -81,7 +81,7 @@ def _get_refs_with_urls(buffer):
         if m is None:
             break
         refs.append(m.groups())
-    return refs
+    return list(reversed(refs))
 
 
 def _get_ref_for_url(refs, ref_url):
