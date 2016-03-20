@@ -1,4 +1,4 @@
-if !has("python3")
+if !has("python3") || exists('loaded_vim_mail_refs')
 	finish
 endif
 
@@ -21,3 +21,5 @@ END
 endfunction
 
 command! AddMailRef call AddMailRef()
+
+let loaded_vim_mail_refs = 1
