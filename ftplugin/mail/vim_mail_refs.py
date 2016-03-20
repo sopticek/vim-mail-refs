@@ -6,6 +6,10 @@
 import re
 
 
+# Regular expression matching the start of a mail signature.
+SIGNATURE_START_RE = r'^--\s*$'
+
+
 def add_ref(buffer, window, ref_url):
     '''Adds a reference to ref_url into the buffer, including adding ref_url to
     the end of the buffer.
@@ -111,7 +115,7 @@ def _add_empty_line_before_ref_list_if_needed(buffer, refs):
 
 def _remove_signature(buffer):
     for i, line in enumerate(reversed(buffer)):
-        if line == '--':
+        if re.match(SIGNATURE_START_RE, line):
             break
     else:  # No break.
         return []
