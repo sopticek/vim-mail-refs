@@ -108,7 +108,7 @@ def _add_empty_line_before_ref_list_if_needed(buffer, refs):
         return
 
     # When there already is an empty line, do not add another one.
-    if len(buffer) >= 2 and buffer[-1] == '':
+    if len(buffer) >= 2 and not buffer[-1]:
         return
 
     buffer.append('')
@@ -131,7 +131,7 @@ def _add_signature(buffer, signature):
     if not signature:
         return
 
-    if buffer[-1] != '':
+    if buffer[-1]:
         buffer.append('')
 
     # We cannot use buffer.extend() because Vim buffers do not support it.
@@ -144,7 +144,7 @@ def _remove_trailing_empty_lines(buffer):
         return
 
     for i, line in enumerate(reversed(buffer)):
-        if line != '':
+        if line:
             break
 
     del buffer[-i:]
