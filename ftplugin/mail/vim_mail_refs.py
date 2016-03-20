@@ -16,6 +16,7 @@ def add_ref(buffer, window, ref_url):
     '''
     row, col = _get_cursor_pos(window)
     signature = _remove_signature(buffer)
+    _remove_trailing_empty_lines(buffer)
     ref = _append_ref_url(buffer, ref_url)
     row, col = _insert_ref(buffer, row, col, ref)
     _add_signature(buffer, signature)
@@ -136,3 +137,14 @@ def _add_signature(buffer, signature):
     # We cannot use buffer.extend() because Vim buffers do not support it.
     for line in signature:
         buffer.append(line)
+
+
+def _remove_trailing_empty_lines(buffer):
+    if len(buffer) <= 1 or buffer[-1]:
+        return
+
+    for i, line in enumerate(reversed(buffer)):
+        if line != '':
+            break
+
+    del buffer[-i:]

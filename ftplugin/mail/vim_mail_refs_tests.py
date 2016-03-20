@@ -90,6 +90,32 @@ class AddRefTests(unittest.TestCase):
         )
         self.assertEqual(self.window.cursor, (2, 15))
 
+    def test_trailing_empty_lines_are_removed(self):
+        buffer = [
+            '[1]. Look at',
+            #           ^
+            '',
+            '[1] URL1',
+            '',
+        ]
+
+        self.window.cursor = (1, 11)
+        ref_url = 'URL2'
+
+        add_ref(buffer, self.window, ref_url)
+
+        self.assertEqual(
+            buffer,
+            [
+                '[1]. Look at [2]',
+                #               ^
+                '',
+                '[1] URL1',
+                '[2] URL2',
+            ]
+        )
+        self.assertEqual(self.window.cursor, (1, 15))
+
     def test_space_is_added_before_ref_when_cursor_is_on_word_end(self):
         buffer = ['look at.']
         #                ^
