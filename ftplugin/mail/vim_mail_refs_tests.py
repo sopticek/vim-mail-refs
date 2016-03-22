@@ -264,6 +264,28 @@ class AddRefTests(unittest.TestCase):
 
 
 class FixMailRefsTests(unittest.TestCase):
+    def test_adds_empty_line_before_signature_where_there_is_none(self):
+        buffer = [
+            'Hello!',
+            '-- ',
+            'Signature'
+            #    ^
+        ]
+
+        new_cursor = fix_mail_refs(buffer, cursor=(2, 4))
+
+        self.assertEqual(
+            buffer,
+            [
+                'Hello!',
+                '',
+                '-- ',
+                #^
+                'Signature'
+            ]
+        )
+        self.assertEqual(new_cursor, (2, 0))
+
     def test_does_nothing_when_there_is_nothing_to_be_done(self):
         buffer = [
             'look at [1].',

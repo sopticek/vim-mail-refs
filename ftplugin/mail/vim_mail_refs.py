@@ -196,12 +196,8 @@ def _add_block(buffer, lines):
 
 def _put_cursor_at_valid_pos(buffer, cursor):
     row, col = cursor
-    if row < len(buffer) and col < len(buffer[row]):
-        return row, col
-
-    # We have to put the cursor at a valid position.
-    row = len(buffer) - 1
+    if row >= len(buffer):
+        row = len(buffer) - 1
     if col >= len(buffer[row]):
         col = 0
-
     return row, col
