@@ -19,20 +19,20 @@ REF_RE = re.compile(
 )
 
 
-def add_ref(buffer, window, ref_url):
+def add_ref(buffer, cursor, ref_url):
     '''Adds a reference to ref_url into the buffer, including adding ref_url to
     the end of the buffer.
     '''
-    row, col = _get_cursor_pos(window)
+    row, col = cursor
     signature = _remove_signature(buffer)
     _remove_trailing_empty_lines(buffer)
     ref = _append_ref_url(buffer, ref_url)
     row, col = _insert_ref(buffer, row, col, ref)
     _add_signature(buffer, signature)
-    _set_cursor_pos(window, row, col)
+    return row, col
 
 
-def norm_mail_refs(buffer, window):
+def norm_mail_refs(buffer, cursor):
     '''Normalizes all references used in the buffer.
 
     The following normalizations are performed:
@@ -42,8 +42,9 @@ def norm_mail_refs(buffer, window):
     _remove_trailing_empty_lines(buffer)
     _remove_unused_refs_with_urls(buffer)
     _remove_trailing_empty_lines(buffer)
-    _put_cursor_at_valid_pos(buffer, window)
     _add_signature(buffer, signature)
+    row, col = _put_cursor_at_valid_pos(buffer, cursor)
+    return row, col
 
 
 def _append_ref_url(buffer, ref_url):
@@ -114,15 +115,6 @@ def _get_ref_for_url(refs, ref_url):
         if url == ref_url:
             return ref, True
     return '[{}]'.format(len(refs) + 1), False
-
-
-def _get_cursor_pos(window):
-    row, col = window.cursor
-    return row - 1, col
-
-
-def _set_cursor_pos(window, row, col):
-    window.cursor = (row + 1, col)
 
 
 def _add_empty_line_before_ref_list_if_needed(buffer, refs):
@@ -202,14 +194,14 @@ def _add_block(buffer, lines):
         buffer.append(line)
 
 
-def _put_cursor_at_valid_pos(buffer, window):
-    row, col = _get_cursor_pos(window)
+def _put_cursor_at_valid_pos(buffer, cursor):
+    row, col = cursor
     if row < len(buffer) and col < len(buffer[row]):
-        return
+        return row, col
 
     # We have to put the cursor at a valid position.
     row = len(buffer) - 1
     if col >= len(buffer[row]):
         col = 0
 
-    _set_cursor_pos(window, row, col)
+    return row, col

@@ -1,20 +1,14 @@
 import unittest
-from unittest import mock
 
 from vim_mail_refs import add_ref
 from vim_mail_refs import norm_mail_refs
 
 
 class AddRefTests(unittest.TestCase):
-    def setUp(self):
-        self.window = mock.Mock()
-
     def test_ref_is_added_correctly_when_buffer_is_empty(self):
         buffer = ['']
-        self.window.cursor = (1, 0)
-        ref_url = 'URL'
 
-        add_ref(buffer, self.window, ref_url)
+        new_cursor = add_ref(buffer, cursor=(0, 0), ref_url='URL')
 
         self.assertEqual(
             buffer,
@@ -25,15 +19,13 @@ class AddRefTests(unittest.TestCase):
                 '[1] URL'
             ]
         )
-        self.assertEqual(self.window.cursor, (1, 2))
+        self.assertEqual(new_cursor, (0, 2))
 
     def test_ref_is_appended_correctly_when_buffer_is_not_empty(self):
         buffer = ['look at ']
         #                 ^
-        self.window.cursor = (1, 7)
-        ref_url = 'URL'
 
-        add_ref(buffer, self.window, ref_url)
+        new_cursor = add_ref(buffer, cursor=(0, 7), ref_url='URL')
 
         self.assertEqual(
             buffer,
@@ -44,15 +36,13 @@ class AddRefTests(unittest.TestCase):
                 '[1] URL'
             ]
         )
-        self.assertEqual(self.window.cursor, (1, 10))
+        self.assertEqual(new_cursor, (0, 10))
 
     def test_ref_is_inserted_correctly_when_buffer_is_not_empty(self):
         buffer = ['look at .']
         #                 ^
-        self.window.cursor = (1, 7)
-        ref_url = 'URL'
 
-        add_ref(buffer, self.window, ref_url)
+        new_cursor = add_ref(buffer, cursor=(0, 7), ref_url='URL')
 
         self.assertEqual(
             buffer,
@@ -63,7 +53,7 @@ class AddRefTests(unittest.TestCase):
                 '[1] URL'
             ]
         )
-        self.assertEqual(self.window.cursor, (1, 10))
+        self.assertEqual(new_cursor, (0, 10))
 
     def test_second_ref_is_added_correctly(self):
         buffer = [
@@ -73,10 +63,8 @@ class AddRefTests(unittest.TestCase):
             '',
             '[1] URL1'
         ]
-        self.window.cursor = (2, 12)
-        ref_url = 'URL2'
 
-        add_ref(buffer, self.window, ref_url)
+        new_cursor = add_ref(buffer, cursor=(1, 12), ref_url='URL2')
 
         self.assertEqual(
             buffer,
@@ -89,7 +77,7 @@ class AddRefTests(unittest.TestCase):
                 '[2] URL2'
             ]
         )
-        self.assertEqual(self.window.cursor, (2, 15))
+        self.assertEqual(new_cursor, (1, 15))
 
     def test_trailing_empty_lines_are_removed(self):
         buffer = [
@@ -100,10 +88,7 @@ class AddRefTests(unittest.TestCase):
             '',
         ]
 
-        self.window.cursor = (1, 11)
-        ref_url = 'URL2'
-
-        add_ref(buffer, self.window, ref_url)
+        new_cursor = add_ref(buffer, cursor=(0, 11), ref_url='URL2')
 
         self.assertEqual(
             buffer,
@@ -115,15 +100,13 @@ class AddRefTests(unittest.TestCase):
                 '[2] URL2',
             ]
         )
-        self.assertEqual(self.window.cursor, (1, 15))
+        self.assertEqual(new_cursor, (0, 15))
 
     def test_space_is_added_before_ref_when_cursor_is_on_word_end(self):
         buffer = ['look at.']
         #                ^
-        self.window.cursor = (1, 6)
-        ref_url = 'URL'
 
-        add_ref(buffer, self.window, ref_url)
+        new_cursor = add_ref(buffer, cursor=(0, 6), ref_url='URL')
 
         self.assertEqual(
             buffer,
@@ -134,15 +117,13 @@ class AddRefTests(unittest.TestCase):
                 '[1] URL'
             ]
         )
-        self.assertEqual(self.window.cursor, (1, 10))
+        self.assertEqual(new_cursor, (0, 10))
 
     def test_ref_is_added_correctly_when_cursor_is_inside_word(self):
         buffer = ['look at.']
         #               ^
-        self.window.cursor = (1, 5)
-        ref_url = 'URL'
 
-        add_ref(buffer, self.window, ref_url)
+        new_cursor = add_ref(buffer, cursor=(0, 5), ref_url='URL')
 
         self.assertEqual(
             buffer,
@@ -153,15 +134,13 @@ class AddRefTests(unittest.TestCase):
                 '[1] URL'
             ]
         )
-        self.assertEqual(self.window.cursor, (1, 10))
+        self.assertEqual(new_cursor, (0, 10))
 
     def test_ref_is_added_correctly_when_cursor_is_at_period(self):
         buffer = ['look at.']
         #                 ^
-        self.window.cursor = (1, 7)
-        ref_url = 'URL'
 
-        add_ref(buffer, self.window, ref_url)
+        new_cursor = add_ref(buffer, cursor=(0, 7), ref_url='URL')
 
         self.assertEqual(
             buffer,
@@ -172,15 +151,13 @@ class AddRefTests(unittest.TestCase):
                 '[1] URL'
             ]
         )
-        self.assertEqual(self.window.cursor, (1, 10))
+        self.assertEqual(new_cursor, (0, 10))
 
     def test_does_not_add_redundant_space(self):
         buffer = ['look at .']
         #                  ^
-        self.window.cursor = (1, 8)
-        ref_url = 'URL'
 
-        add_ref(buffer, self.window, ref_url)
+        new_cursor = add_ref(buffer, cursor=(0, 8), ref_url='URL')
 
         self.assertEqual(
             buffer,
@@ -191,7 +168,7 @@ class AddRefTests(unittest.TestCase):
                 '[1] URL'
             ]
         )
-        self.assertEqual(self.window.cursor, (1, 10))
+        self.assertEqual(new_cursor, (0, 10))
 
     def test_uses_existing_ref_when_url_has_already_been_added(self):
         buffer = [
@@ -201,10 +178,8 @@ class AddRefTests(unittest.TestCase):
             '',
             '[1] URL1'
         ]
-        self.window.cursor = (2, 12)
-        ref_url = 'URL1'
 
-        add_ref(buffer, self.window, ref_url)
+        new_cursor = add_ref(buffer, cursor=(1, 12), ref_url='URL1')
 
         self.assertEqual(
             buffer,
@@ -216,7 +191,7 @@ class AddRefTests(unittest.TestCase):
                 '[1] URL1'
             ]
         )
-        self.assertEqual(self.window.cursor, (2, 15))
+        self.assertEqual(new_cursor, (1, 15))
 
     def test_does_not_add_redundant_empty_lines_before_reference_list(self):
         buffer = [
@@ -224,10 +199,8 @@ class AddRefTests(unittest.TestCase):
             #       ^
             ''
         ]
-        self.window.cursor = (1, 7)
-        ref_url = 'URL'
 
-        add_ref(buffer, self.window, ref_url)
+        new_cursor = add_ref(buffer, cursor=(0, 7), ref_url='URL')
 
         self.assertEqual(
             buffer,
@@ -238,7 +211,7 @@ class AddRefTests(unittest.TestCase):
                 '[1] URL'
             ]
         )
-        self.assertEqual(self.window.cursor, (1, 10))
+        self.assertEqual(new_cursor, (0, 10))
 
     def test_reference_list_is_placed_before_signature(self):
         buffer = [
@@ -247,10 +220,8 @@ class AddRefTests(unittest.TestCase):
             '--',
             'Signature'
         ]
-        self.window.cursor = (1, 7)
-        ref_url = 'URL'
 
-        add_ref(buffer, self.window, ref_url)
+        new_cursor = add_ref(buffer, cursor=(0, 7), ref_url='URL')
 
         self.assertEqual(
             buffer,
@@ -264,7 +235,7 @@ class AddRefTests(unittest.TestCase):
                 'Signature'
             ]
         )
-        self.assertEqual(self.window.cursor, (1, 10))
+        self.assertEqual(new_cursor, (0, 10))
 
     def test_does_not_add_redundant_empty_line_before_signature(self):
         buffer = [
@@ -274,10 +245,8 @@ class AddRefTests(unittest.TestCase):
             '--',
             'Signature'
         ]
-        self.window.cursor = (1, 7)
-        ref_url = 'URL'
 
-        add_ref(buffer, self.window, ref_url)
+        new_cursor = add_ref(buffer, cursor=(0, 7), ref_url='URL')
 
         self.assertEqual(
             buffer,
@@ -291,13 +260,10 @@ class AddRefTests(unittest.TestCase):
                 'Signature'
             ]
         )
-        self.assertEqual(self.window.cursor, (1, 10))
+        self.assertEqual(new_cursor, (0, 10))
 
 
 class NormMailRefsTests(unittest.TestCase):
-    def setUp(self):
-        self.window = mock.Mock()
-
     def test_does_nothing_when_there_is_nothing_to_be_done(self):
         buffer = [
             'look at [1].',
@@ -310,13 +276,12 @@ class NormMailRefsTests(unittest.TestCase):
             '-- ',
             'Signature'
         ]
-        self.window.cursor = (2, 15)
         orig_buffer = buffer[:]
 
-        norm_mail_refs(buffer, self.window)
+        new_cursor = norm_mail_refs(buffer, cursor=(1, 15))
 
         self.assertEqual(buffer, orig_buffer)
-        self.assertEqual(self.window.cursor, (2, 15))
+        self.assertEqual(new_cursor, (1, 15))
 
     def test_unused_references_are_removed(self):
         buffer = [
@@ -331,9 +296,8 @@ class NormMailRefsTests(unittest.TestCase):
             '-- ',
             'Signature'
         ]
-        self.window.cursor = (2, 15)
 
-        norm_mail_refs(buffer, self.window)
+        new_cursor = norm_mail_refs(buffer, cursor=(1, 15))
 
         self.assertEqual(
             buffer,
@@ -348,7 +312,7 @@ class NormMailRefsTests(unittest.TestCase):
                 'Signature'
             ]
         )
-        self.assertEqual(self.window.cursor, (2, 15))
+        self.assertEqual(new_cursor, (1, 15))
 
     def test_empty_lines_are_squashed_into_one(self):
         buffer = [
@@ -362,9 +326,8 @@ class NormMailRefsTests(unittest.TestCase):
             '-- ',
             'Signature'
         ]
-        self.window.cursor = (1, 5)
 
-        norm_mail_refs(buffer, self.window)
+        new_cursor = norm_mail_refs(buffer, cursor=(0, 5))
 
         self.assertEqual(
             buffer,
@@ -376,7 +339,7 @@ class NormMailRefsTests(unittest.TestCase):
                 'Signature'
             ]
         )
-        self.assertEqual(self.window.cursor, (1, 5))
+        self.assertEqual(new_cursor, (0, 5))
 
     def test_keeps_standalone_reference_on_line(self):
         buffer = [
@@ -385,13 +348,12 @@ class NormMailRefsTests(unittest.TestCase):
             '',
             '[1] URL1'
         ]
-        self.window.cursor = (1, 2)
         orig_buffer = buffer[:]
 
-        norm_mail_refs(buffer, self.window)
+        new_cursor = norm_mail_refs(buffer, cursor=(0, 2))
 
         self.assertEqual(buffer, orig_buffer)
-        self.assertEqual(self.window.cursor, (1, 2))
+        self.assertEqual(new_cursor, (0, 2))
 
     def test_does_not_consider_subscripts_in_code_as_references(self):
         buffer = [
@@ -413,9 +375,8 @@ class NormMailRefsTests(unittest.TestCase):
             '[6] URL6',
             '[7] URL7'
         ]
-        self.window.cursor = (1, 5)
 
-        norm_mail_refs(buffer, self.window)
+        new_cursor = norm_mail_refs(buffer, cursor=(0, 5))
 
         self.assertEqual(
             buffer,
@@ -431,7 +392,7 @@ class NormMailRefsTests(unittest.TestCase):
                 '[0, 1, 2, 3, 4, 5, 6, 7][7]'
             ]
         )
-        self.assertEqual(self.window.cursor, (1, 5))
+        self.assertEqual(new_cursor, (0, 5))
 
     def test_cursor_is_at_start_of_prev_line_when_col_no_longer_exists(self):
         buffer = [
@@ -440,9 +401,8 @@ class NormMailRefsTests(unittest.TestCase):
             '[1] URL1'
             #       ^
         ]
-        self.window.cursor = (3, 7)
 
-        norm_mail_refs(buffer, self.window)
+        new_cursor = norm_mail_refs(buffer, cursor=(2, 7))
 
         self.assertEqual(
             buffer,
@@ -452,7 +412,7 @@ class NormMailRefsTests(unittest.TestCase):
                 #^
             ]
         )
-        self.assertEqual(self.window.cursor, (2, 0))
+        self.assertEqual(new_cursor, (1, 0))
 
     def test_cursor_is_at_prev_line_at_same_col_when_col_exists(self):
         buffer = [
@@ -460,9 +420,8 @@ class NormMailRefsTests(unittest.TestCase):
             '[1] URL1'
             #    ^
         ]
-        self.window.cursor = (2, 4)
 
-        norm_mail_refs(buffer, self.window)
+        new_cursor = norm_mail_refs(buffer, cursor=(1, 4))
 
         self.assertEqual(
             buffer,
@@ -471,4 +430,19 @@ class NormMailRefsTests(unittest.TestCase):
                 #    ^
             ]
         )
-        self.assertEqual(self.window.cursor, (1, 4))
+        self.assertEqual(new_cursor, (0, 4))
+
+    def test_cursor_stays_on_signature_when_nothing_is_removed(self):
+        buffer = [
+            'Hello!',
+            '',
+            '-- ',
+            'Signature'
+            #    ^
+        ]
+        orig_buffer = buffer[:]
+
+        new_cursor = norm_mail_refs(buffer, cursor=(3, 4))
+
+        self.assertEqual(buffer, orig_buffer)
+        self.assertEqual(new_cursor, (3, 4))
