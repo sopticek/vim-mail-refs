@@ -1,7 +1,7 @@
 import unittest
 
 from vim_mail_refs import add_ref
-from vim_mail_refs import norm_mail_refs
+from vim_mail_refs import fix_mail_refs
 
 
 class AddRefTests(unittest.TestCase):
@@ -263,7 +263,7 @@ class AddRefTests(unittest.TestCase):
         self.assertEqual(new_cursor, (0, 10))
 
 
-class NormMailRefsTests(unittest.TestCase):
+class FixMailRefsTests(unittest.TestCase):
     def test_does_nothing_when_there_is_nothing_to_be_done(self):
         buffer = [
             'look at [1].',
@@ -278,7 +278,7 @@ class NormMailRefsTests(unittest.TestCase):
         ]
         orig_buffer = buffer[:]
 
-        new_cursor = norm_mail_refs(buffer, cursor=(1, 15))
+        new_cursor = fix_mail_refs(buffer, cursor=(1, 15))
 
         self.assertEqual(buffer, orig_buffer)
         self.assertEqual(new_cursor, (1, 15))
@@ -297,7 +297,7 @@ class NormMailRefsTests(unittest.TestCase):
             'Signature'
         ]
 
-        new_cursor = norm_mail_refs(buffer, cursor=(1, 15))
+        new_cursor = fix_mail_refs(buffer, cursor=(1, 15))
 
         self.assertEqual(
             buffer,
@@ -327,7 +327,7 @@ class NormMailRefsTests(unittest.TestCase):
             'Signature'
         ]
 
-        new_cursor = norm_mail_refs(buffer, cursor=(0, 5))
+        new_cursor = fix_mail_refs(buffer, cursor=(0, 5))
 
         self.assertEqual(
             buffer,
@@ -350,7 +350,7 @@ class NormMailRefsTests(unittest.TestCase):
         ]
         orig_buffer = buffer[:]
 
-        new_cursor = norm_mail_refs(buffer, cursor=(0, 2))
+        new_cursor = fix_mail_refs(buffer, cursor=(0, 2))
 
         self.assertEqual(buffer, orig_buffer)
         self.assertEqual(new_cursor, (0, 2))
@@ -376,7 +376,7 @@ class NormMailRefsTests(unittest.TestCase):
             '[7] URL7'
         ]
 
-        new_cursor = norm_mail_refs(buffer, cursor=(0, 5))
+        new_cursor = fix_mail_refs(buffer, cursor=(0, 5))
 
         self.assertEqual(
             buffer,
@@ -402,7 +402,7 @@ class NormMailRefsTests(unittest.TestCase):
             #       ^
         ]
 
-        new_cursor = norm_mail_refs(buffer, cursor=(2, 7))
+        new_cursor = fix_mail_refs(buffer, cursor=(2, 7))
 
         self.assertEqual(
             buffer,
@@ -421,7 +421,7 @@ class NormMailRefsTests(unittest.TestCase):
             #    ^
         ]
 
-        new_cursor = norm_mail_refs(buffer, cursor=(1, 4))
+        new_cursor = fix_mail_refs(buffer, cursor=(1, 4))
 
         self.assertEqual(
             buffer,
@@ -442,7 +442,7 @@ class NormMailRefsTests(unittest.TestCase):
         ]
         orig_buffer = buffer[:]
 
-        new_cursor = norm_mail_refs(buffer, cursor=(3, 4))
+        new_cursor = fix_mail_refs(buffer, cursor=(3, 4))
 
         self.assertEqual(buffer, orig_buffer)
         self.assertEqual(new_cursor, (3, 4))

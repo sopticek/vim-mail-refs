@@ -57,11 +57,11 @@ END
 endfunction
 
 
-function! NormMailRefs()
+function! FixMailRefs()
 	let [row, col] = GetCursorPosForPython()
 
 python3 << END
-row, col = vim_mail_refs.norm_mail_refs(
+row, col = vim_mail_refs.fix_mail_refs(
 	vim.current.buffer,
 	(int(vim.eval('l:row')), int(vim.eval('l:col')))
 )
@@ -74,6 +74,6 @@ endfunction
 
 
 command! AddMailRef call AddMailRef()
-command! NormMailRefs call NormMailRefs()
+command! FixMailRefs call FixMailRefs()
 
 let loaded_vim_mail_refs = 1

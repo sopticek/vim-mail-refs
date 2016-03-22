@@ -32,7 +32,7 @@ def add_ref(buffer, cursor, ref_url):
     return row, col
 
 
-def norm_mail_refs(buffer, cursor):
+def fix_mail_refs(buffer, cursor):
     '''Normalizes all references used in the buffer.
 
     The following normalizations are performed:
