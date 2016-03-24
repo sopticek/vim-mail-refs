@@ -5,6 +5,8 @@
 
 import re
 
+from contextlib import contextmanager
+
 
 # Regular expression matching the start of a mail signature.
 SIGNATURE_START_RE = r'^--\s*$'
@@ -24,11 +26,10 @@ def add_ref(buffer, cursor, ref_url):
     the end of the buffer.
     '''
     row, col = cursor
-    signature = _remove_signature(buffer)
-    _remove_trailing_empty_lines(buffer)
-    ref = _append_ref_url(buffer, ref_url)
-    row, col = _insert_ref(buffer, row, col, ref)
-    _add_signature(buffer, signature)
+    with _removed_signature(buffer):
+        _remove_trailing_empty_lines(buffer)
+        ref = _append_ref_url(buffer, ref_url)
+        row, col = _insert_ref(buffer, row, col, ref)
     return row, col
 
 
@@ -38,13 +39,29 @@ def fix_mail_refs(buffer, cursor):
     The following normalizations are performed:
     - unused references are removed
     '''
-    signature = _remove_signature(buffer)
-    _remove_trailing_empty_lines(buffer)
-    _remove_unused_refs_with_urls(buffer)
-    _remove_trailing_empty_lines(buffer)
-    _add_signature(buffer, signature)
+    with _removed_signature(buffer):
+        _remove_trailing_empty_lines(buffer)
+        _remove_unused_refs_with_urls(buffer)
+        _remove_trailing_empty_lines(buffer)
     row, col = _put_cursor_at_valid_pos(buffer, cursor)
     return row, col
+
+
+@contextmanager
+def _removed_signature(buffer):
+    for i, line in enumerate(reversed(buffer)):
+        if re.match(SIGNATURE_START_RE, line):
+            sig_slice = slice(-(i + 1), len(buffer))
+            signature = buffer[sig_slice]
+            del buffer[sig_slice]
+            break
+    else:  # No break.
+        signature = []
+
+    try:
+        yield signature
+    finally:
+        _add_block(buffer, signature)
 
 
 def _append_ref_url(buffer, ref_url):
@@ -120,23 +137,6 @@ def _get_ref_for_url(refs, ref_url):
 def _add_empty_line_before_ref_list_if_needed(buffer, refs):
     if not refs:
         buffer.append('')
-
-
-def _remove_signature(buffer):
-    for i, line in enumerate(reversed(buffer)):
-        if re.match(SIGNATURE_START_RE, line):
-            break
-    else:  # No break.
-        return []
-
-    sig_slice = slice(-(i + 1), len(buffer))
-    signature = buffer[sig_slice]
-    del buffer[sig_slice]
-    return signature
-
-
-def _add_signature(buffer, signature):
-    _add_block(buffer, signature)
 
 
 def _remove_trailing_empty_lines(buffer):
