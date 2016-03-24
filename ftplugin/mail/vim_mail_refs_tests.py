@@ -527,3 +527,104 @@ class FixMailRefsTests(unittest.TestCase):
 
         self.assertEqual(buffer, orig_buffer)
         self.assertEqual(new_cursor, (3, 4))
+
+    def test_refs_are_not_renumbered_when_do_not_need_to_be_renumbered(self):
+        buffer = [
+            'look at [1].',
+            'Also look at [2].',
+            #               ^
+            '',
+            '[1] URL1',
+            '[2] URL2'
+        ]
+        orig_buffer = buffer[:]
+
+        new_cursor = fix_mail_refs(buffer, cursor=(1, 15))
+
+        self.assertEqual(buffer, orig_buffer)
+        self.assertEqual(new_cursor, (1, 15))
+
+    def test_refs_are_renumbered_when_two_refs_need_to_be_switched(self):
+        buffer = [
+            'look at [2].',
+            'Also look at [1].',
+            #               ^
+            '',
+            '[1] URL2',
+            '[2] URL1'
+        ]
+
+        new_cursor = fix_mail_refs(buffer, cursor=(1, 15))
+
+        self.assertEqual(
+            buffer,
+            [
+                'look at [1].',
+                'Also look at [2].',
+                #               ^
+                '',
+                '[1] URL1',
+                '[2] URL2'
+            ]
+        )
+        self.assertEqual(new_cursor, (1, 15))
+
+    def test_refs_are_renumbered_correctly_when_ref_size_decreases(self):
+        buffer = [
+            'look at [10].',
+            #            ^
+            '',
+            '[10] URL1'
+        ]
+
+        new_cursor = fix_mail_refs(buffer, cursor=(0, 12))
+
+        self.assertEqual(
+            buffer,
+            [
+                'look at [1].',
+                #^
+                '',
+                '[1] URL1'
+            ]
+        )
+        self.assertEqual(new_cursor, (0, 0))
+
+    def test_refs_are_renumbered_correctly_when_ref_size_increases(self):
+        buffer = [
+            'look at [10], [9], [8], [7], [6], [5], [4], [3], [2], [1].',
+            #            ^
+            '',
+            '[10] URL1',
+            '[9] URL2',
+            '[8] URL3',
+            '[7] URL4',
+            '[6] URL5',
+            '[5] URL6',
+            '[4] URL7',
+            '[3] URL8',
+            '[2] URL9',
+            '[1] URL10'
+        ]
+
+        new_cursor = fix_mail_refs(buffer, cursor=(0, 12))
+
+        self.assertEqual(
+            buffer,
+            [
+                'look at [1], [2], [3], [4], [5], [6], [7], [8], [9], [10].',
+                #            ^
+                '',
+                '[1] URL1',
+                '[2] URL2',
+                '[3] URL3',
+                '[4] URL4',
+                '[5] URL5',
+                '[6] URL6',
+                '[7] URL7',
+                '[8] URL8',
+                '[9] URL9',
+                '[10] URL10'
+            ]
+        )
+        self.assertEqual(new_cursor, (0, 12))

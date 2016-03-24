@@ -83,11 +83,13 @@ def fix_mail_refs(buffer, cursor):
 
     The following normalizations are performed:
     - unused references are removed
+    - references are renumbered by their position in the buffer ([1], [2], ...)
     '''
     with _removed_signature(buffer):
         _remove_trailing_empty_lines(buffer)
         _remove_unused_refs_with_urls(buffer)
         _remove_trailing_empty_lines(buffer)
+        _renumber_refs(buffer)
     row, col = _put_cursor_at_valid_pos(buffer, cursor)
     return row, col
 
@@ -195,15 +197,68 @@ def _remove_trailing_empty_lines(buffer):
     del buffer[-i:]
 
 
-def _remove_unused_refs_with_urls(buffer):
+def _renumber_refs(buffer):
+    with _removed_refs_with_urls(buffer) as refs_with_urls:
+        ref_map = _renumber_refs_in_mail_body(buffer)
+        _update_refs_with_urls(refs_with_urls, ref_map)
+
+
+def _renumber_refs_in_mail_body(buffer):
+    ref_counter = 1
+    ref_map = {}
+    row, col = 0, 0
+
+    while True:
+        pos = _get_next_ref_pos(buffer, row, col)
+        if pos is None:
+            break
+        row, (col_start, col_end) = pos
+        ref = Ref.from_str(buffer[row][col_start:col_end])
+        new_ref = ref_map.setdefault(ref, Ref(ref_counter))
+        if new_ref.number == ref_counter:
+            ref_counter += 1
+        row, col = _replace_ref(buffer, row, col_start, col_end, new_ref)
+
+    return ref_map
+
+
+def _get_next_ref_pos(buffer, row, col):
+    for r in range(row, len(buffer)):
+        for m in re.finditer(REF_RE, buffer[r][col:]):
+            return r, (col + m.start(1), col + m.end(1))
+        col = 0
+
+
+def _replace_ref(buffer, row, col_start, col_end, new_ref):
+    line = buffer[row][:col_start] + str(new_ref) + buffer[row][col_end:]
+    buffer[row] = line
+    return row, col_start + len(str(new_ref))
+
+
+def _update_refs_with_urls(refs_with_urls, ref_map):
+    for i, (ref, url) in enumerate(refs_with_urls):
+        refs_with_urls[i] = RefWithUrl(ref_map[ref], url)
+    refs_with_urls.sort()
+
+
+@contextmanager
+def _removed_refs_with_urls(buffer):
     refs_with_urls = _remove_refs_with_urls(buffer)
-    used_refs = _get_used_refs(buffer)
-    new_refs_with_urls = [
-        RefWithUrl(ref, url)
-        for ref, url in refs_with_urls
-        if ref in used_refs
-    ]
-    _add_refs_with_urls(buffer, new_refs_with_urls)
+    try:
+        yield refs_with_urls
+    finally:
+        _add_refs_with_urls(buffer, refs_with_urls)
+
+
+def _remove_unused_refs_with_urls(buffer):
+    with _removed_refs_with_urls(buffer) as refs_with_urls:
+        used_refs = _get_used_refs(buffer)
+        new_refs_with_urls = [
+            RefWithUrl(ref, url)
+            for ref, url in refs_with_urls
+            if ref in used_refs
+        ]
+        refs_with_urls[:] = new_refs_with_urls
 
 
 def _remove_refs_with_urls(buffer):
