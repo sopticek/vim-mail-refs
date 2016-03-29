@@ -5,7 +5,9 @@
 
 import re
 
+from collections import namedtuple
 from contextlib import contextmanager
+from functools import total_ordering
 
 
 # Regular expression matching the start of a mail signature.
@@ -19,6 +21,49 @@ REF_RE = re.compile(
     (?!\[)        # What cannot be after reference.
     ''', re.VERBOSE
 )
+
+
+@total_ordering
+class Ref:
+    def __init__(self, number):
+        if number < 1:
+            raise ValueError('number has to be positive')
+        self._number = number
+
+    @property
+    def number(self):
+        return self._number
+
+    @classmethod
+    def from_str(cls, s):
+        m = re.match(r'\[(\d+)\]', s)
+        if m is None:
+            return None
+        return cls(int(m.group(1)))
+
+    def __str__(self):
+        return '[{}]'.format(self.number)
+
+    def __eq__(self, other):
+        return self.number == other.number
+
+    def __lt__(self, other):
+        return self.number < other.number
+
+    def __hash__(self):
+        return hash(self.number)
+
+
+class RefWithUrl(namedtuple('RefWithUrl', ['ref', 'url'])):
+    def __str__(self):
+        return '{} {}'.format(self.ref, self.url)
+
+    @classmethod
+    def from_str(cls, s):
+        m = re.match(r'\[(\d+)\] (.+)', s)
+        if m is None:
+            return None
+        return cls(ref=Ref(int(m.group(1))), url=m.group(2))
 
 
 def add_ref(buffer, cursor, ref_url):
@@ -72,7 +117,8 @@ def _append_ref_url(buffer, ref_url):
 
     ref, ref_exists = _get_ref_for_url(refs, ref_url)
     if not ref_exists:
-        buffer.append('{} {}'.format(ref, ref_url))
+        ref_with_url = RefWithUrl(ref, ref_url)
+        buffer.append(str(ref_with_url))
     return ref
 
 
@@ -82,8 +128,8 @@ def _insert_ref(buffer, row, col, ref):
     line = buffer[row]
 
     if not line:
-        buffer[row] = ref
-        return row, col + len(ref) - 1
+        buffer[row] = str(ref)
+        return row, len(buffer[row]) - 1
 
     line, col = _prepare_line_for_ref_insert(line, col)
     buffer[row] = '{} {}{}'.format(
@@ -91,7 +137,7 @@ def _insert_ref(buffer, row, col, ref):
         ref,
         line[col:]
     )
-    return row, col + len(ref)
+    return row, col + len(str(ref))
 
 
 def _prepare_line_for_ref_insert(line, col):
@@ -118,10 +164,9 @@ def _get_refs_with_urls(buffer):
     '''
     refs = []
     for line in reversed(buffer):
-        m = re.match(r'(\[\d+\]) (.+)', line)
-        if m is None:
-            break
-        refs.append(m.groups())
+        ref_with_url = RefWithUrl.from_str(line)
+        if ref_with_url is not None:
+            refs.append(ref_with_url)
     return list(reversed(refs))
 
 
@@ -131,7 +176,7 @@ def _get_ref_for_url(refs, ref_url):
     for ref, url in refs:
         if url == ref_url:
             return ref, True
-    return '[{}]'.format(len(refs) + 1), False
+    return Ref(len(refs) + 1), False
 
 
 def _add_empty_line_before_ref_list_if_needed(buffer, refs):
@@ -154,7 +199,9 @@ def _remove_unused_refs_with_urls(buffer):
     refs_with_urls = _remove_refs_with_urls(buffer)
     used_refs = _get_used_refs(buffer)
     new_refs_with_urls = [
-        (ref, url) for ref, url in refs_with_urls if ref in used_refs
+        RefWithUrl(ref, url)
+        for ref, url in refs_with_urls
+        if ref in used_refs
     ]
     _add_refs_with_urls(buffer, new_refs_with_urls)
 
@@ -167,7 +214,7 @@ def _remove_refs_with_urls(buffer):
 
 
 def _add_refs_with_urls(buffer, refs_with_urls):
-    lines = [' '.join(ref_with_url) for ref_with_url in refs_with_urls]
+    lines = [str(ref_with_url) for ref_with_url in refs_with_urls]
     _add_block(buffer, lines)
 
 
@@ -179,7 +226,7 @@ def _get_used_refs(buffer):
 
 
 def _get_used_refs_in_line(line):
-    return set(re.findall(REF_RE, line))
+    return set(Ref.from_str(s) for s in re.findall(REF_RE, line))
 
 
 def _add_block(buffer, lines):

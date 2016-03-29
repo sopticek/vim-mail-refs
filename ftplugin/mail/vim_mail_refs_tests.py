@@ -1,7 +1,66 @@
 import unittest
 
+from vim_mail_refs import Ref
+from vim_mail_refs import RefWithUrl
 from vim_mail_refs import add_ref
 from vim_mail_refs import fix_mail_refs
+
+
+class RefTests(unittest.TestCase):
+    def test_number_is_accessible_after_creation(self):
+        ref = Ref(5)
+
+        self.assertEqual(ref.number, 5)
+
+    def test_number_has_to_be_positive(self):
+        with self.assertRaises(ValueError):
+            Ref(0)
+
+    def test_str_returns_correct_string(self):
+        ref = Ref(5)
+
+        self.assertEqual(str(ref), "[5]")
+
+    def test_from_str_returns_correct_ref(self):
+        ref = Ref.from_str('[1]')
+
+        self.assertEqual(ref.number, 1)
+
+    def test_from_str_return_None_when_str_cannot_be_parsed(self):
+        self.assertIsNone(Ref.from_str(''))
+
+    def test_refs_are_compared_by_their_numbers(self):
+        self.assertEqual(Ref(1), Ref(1))
+        self.assertNotEqual(Ref(1), Ref(2))
+        self.assertLess(Ref(1), Ref(2))
+        self.assertGreater(Ref(2), Ref(1))
+        self.assertLessEqual(Ref(1), Ref(1))
+        self.assertGreaterEqual(Ref(2), Ref(1))
+
+    def test_can_be_put_into_set(self):
+        {Ref(1)}
+
+
+class RefWithUrlTests(unittest.TestCase):
+    def test_attributes_are_accessible_after_creation(self):
+        ref_with_url = RefWithUrl(Ref(1), 'URL')
+
+        self.assertEqual(ref_with_url.ref, Ref(1))
+        self.assertEqual(ref_with_url.url, 'URL')
+
+    def test_str_returns_correct_string(self):
+        ref_with_url = RefWithUrl(Ref(1), 'URL')
+
+        self.assertEqual(str(ref_with_url), '[1] URL')
+
+    def test_from_str_returns_correct_ref_with_url(self):
+        ref_with_url = RefWithUrl.from_str('[1] URL')
+
+        self.assertEqual(ref_with_url.ref, Ref(1))
+        self.assertEqual(ref_with_url.url, 'URL')
+
+    def test_from_str_returns_None_when_str_cannot_be_parsed(self):
+        self.assertIsNone(RefWithUrl.from_str(''))
 
 
 class AddRefTests(unittest.TestCase):
