@@ -33,9 +33,9 @@ function! SetCursorPosInVim(row, col)
 	" conversion of row is simple (it is just the Python row + 1). To convert
 	" the column, we move to the beginning of the line and apply 'l' (move
 	" right) col times.
-	execute 'normal ' . (a:row + 1) . 'G'
-	execute 'normal 0'
-	execute 'normal ' . a:col . 'l'
+	execute 'normal! ' . (a:row + 1) . 'G'
+	execute 'normal! 0'
+	execute 'normal! ' . a:col . 'l'
 endfunction
 
 
