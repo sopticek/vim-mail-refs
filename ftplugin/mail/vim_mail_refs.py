@@ -22,6 +22,9 @@ REF_RE = re.compile(
     ''', re.VERBOSE
 )
 
+# Regular expression matching a word.
+WORD_RE = r'[-\w_]+'
+
 
 @total_ordering
 class Ref:
@@ -146,8 +149,8 @@ def _prepare_line_for_ref_insert(line, col):
     '''Returns (line, col) so that the caller can safely insert ' [x]' at
     line[col], without introducing redundant spaces.
     '''
-    # Get to the first non-alpha character.
-    while col < len(line) and line[col].isalpha():
+    # Get to the first non-word character.
+    while col < len(line) and _is_part_of_word(line[col]):
         col += 1
 
     # Get to the leftmost space.
@@ -159,6 +162,10 @@ def _prepare_line_for_ref_insert(line, col):
         line = line[:col] + line[col + 1:]
 
     return line, col
+
+
+def _is_part_of_word(s):
+    return re.fullmatch(WORD_RE, s) is not None
 
 
 def _get_refs_with_urls(buffer):

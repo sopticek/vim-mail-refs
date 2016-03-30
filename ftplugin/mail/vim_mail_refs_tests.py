@@ -212,6 +212,23 @@ class AddRefTests(unittest.TestCase):
         )
         self.assertEqual(new_cursor, (0, 10))
 
+    def test_ref_is_added_correctly_when_word_contains_special_chars(self):
+        buffer = ['look at 3f5-4_2.']
+        #                    ^
+
+        new_cursor = add_ref(buffer, cursor=(0, 10), ref_url='URL')
+
+        self.assertEqual(
+            buffer,
+            [
+                'look at 3f5-4_2 [1].',
+                #                ^
+                '',
+                '[1] URL'
+            ]
+        )
+        self.assertEqual(new_cursor, (0, 18))
+
     def test_does_not_add_redundant_space(self):
         buffer = ['look at .']
         #                  ^
