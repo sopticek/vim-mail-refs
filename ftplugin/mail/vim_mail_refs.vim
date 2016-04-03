@@ -9,7 +9,7 @@ python3 sys.path.append(vim.eval('expand("<sfile>:h")'))
 python3 import vim_mail_refs
 
 
-function! GetCursorPosForPython()
+function! s:GetCursorPosForPython()
 	" Originally, vim.current.windows.cursor was used in Python code to get
 	" cursor position. It returns (row, col) where row is the line number and
 	" col is the *byte offset* on the current line. However, in Python, we need
@@ -27,7 +27,7 @@ function! GetCursorPosForPython()
 endfunction
 
 
-function! SetCursorPosInVim(row, col)
+function! s:SetCursorPosInVim(row, col)
 	" We have to convert cursor position from Python to Vim. In Python, the
 	" position is based on characters, but in Vim it is based on bytes. The
 	" conversion of row is simple (it is just the Python row + 1). To convert
@@ -39,24 +39,24 @@ function! SetCursorPosInVim(row, col)
 endfunction
 
 
-function! AddMailRef()
+function! s:AddMailRef()
 	let ref_url = input('Enter URL: ')
 	if ref_url != ''
-		call AddMailRefOrUrl(ref_url)
+		call s:AddMailRefOrUrl(ref_url)
 	endif
 endfunction
 
 
-function! AddMailRefFromMenu()
-	let ref = GetRefFromMenuWithRefsWithUrls()
+function! s:AddMailRefFromMenu()
+	let ref = s:GetRefFromMenuWithRefsWithUrls()
 	if ref != ''
-		call AddMailRefOrUrl(ref)
+		call s:AddMailRefOrUrl(ref)
 	endif
 endfunction
 
 
-function! AddMailRefOrUrl(ref_or_url)
-	let [row, col] = GetCursorPosForPython()
+function! s:AddMailRefOrUrl(ref_or_url)
+	let [row, col] = s:GetCursorPosForPython()
 
 python3 << END
 row, col = vim_mail_refs.add_ref(
@@ -68,11 +68,11 @@ vim.command('let row = {}'.format(row))
 vim.command('let col = {}'.format(col))
 END
 
-	call SetCursorPosInVim(row, col)
+	call s:SetCursorPosInVim(row, col)
 endfunction
 
 
-function! GetRefFromMenuWithRefsWithUrls()
+function! s:GetRefFromMenuWithRefsWithUrls()
 python3 << END
 refs_with_urls = vim_mail_refs.get_refs_with_urls_for_menu(
 	vim.current.buffer
@@ -92,8 +92,8 @@ END
 endfunction
 
 
-function! FixMailRefs()
-	let [row, col] = GetCursorPosForPython()
+function! s:FixMailRefs()
+	let [row, col] = s:GetCursorPosForPython()
 
 python3 << END
 row, col = vim_mail_refs.fix_mail_refs(
@@ -104,12 +104,12 @@ vim.command('let row = {}'.format(row))
 vim.command('let col = {}'.format(col))
 END
 
-	call SetCursorPosInVim(row, col)
+	call s:SetCursorPosInVim(row, col)
 endfunction
 
 
-command! AddMailRef call AddMailRef()
-command! AddMailRefFromMenu call AddMailRefFromMenu()
-command! FixMailRefs call FixMailRefs()
+command! AddMailRef call s:AddMailRef()
+command! AddMailRefFromMenu call s:AddMailRefFromMenu()
+command! FixMailRefs call s:FixMailRefs()
 
 let loaded_vim_mail_refs = 1
