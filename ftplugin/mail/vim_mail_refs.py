@@ -69,16 +69,35 @@ class RefWithUrl(namedtuple('RefWithUrl', ['ref', 'url'])):
         return cls(ref=Ref(int(m.group(1))), url=m.group(2))
 
 
-def add_ref(buffer, cursor, ref_url):
-    '''Adds a reference to ref_url into the buffer, including adding ref_url to
-    the end of the buffer.
+def add_ref(buffer, cursor, ref_or_url):
+    '''Adds a reference into the buffer.
+
+    If ref_or_url is a URL, it adds a reference to this URL into the current
+    cursor position in the mail body, including adding the URL to the end of
+    the buffer. Otherwise, if ref_or_url is a reference, it adds this reference
+    into the current cursor position in the mail body.
     '''
     row, col = cursor
     with _removed_signature(buffer):
         _remove_trailing_empty_lines(buffer)
-        ref = _append_ref_url(buffer, ref_url)
+        ref = _get_or_create_ref(buffer, ref_or_url)
         row, col = _insert_ref(buffer, row, col, ref)
     return row, col
+
+
+def get_refs_with_urls_for_menu(buffer):
+    '''Returns a list of references with URLs to be used when generating a menu.
+
+    Each reference with a URL is a string of a following form:
+
+        [1] http://www.url.com
+    '''
+    with _removed_signature(buffer):
+        refs_with_urls = _get_refs_with_urls(buffer)
+
+    return [
+        '{} {}'.format(str(ref), url) for ref, url in refs_with_urls
+    ]
 
 
 def fix_mail_refs(buffer, cursor):
@@ -310,3 +329,18 @@ def _put_cursor_at_valid_pos(buffer, cursor):
     if col >= len(buffer[row]):
         col = 0
     return row, col
+
+
+def _get_or_create_ref(buffer, ref_or_url):
+    '''Returns an existing reference or creates and returns a new reference.
+    '''
+    ref = Ref.from_str(ref_or_url)
+    if ref is not None:
+        return ref
+
+    ref = Ref.from_str('[{}]'.format(ref_or_url))
+    if ref is not None:
+        return ref
+
+    ref = _append_ref_url(buffer, ref_or_url)
+    return ref

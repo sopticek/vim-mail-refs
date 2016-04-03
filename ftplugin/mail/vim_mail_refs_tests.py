@@ -4,6 +4,7 @@ from vim_mail_refs import Ref
 from vim_mail_refs import RefWithUrl
 from vim_mail_refs import add_ref
 from vim_mail_refs import fix_mail_refs
+from vim_mail_refs import get_refs_with_urls_for_menu
 
 
 class RefTests(unittest.TestCase):
@@ -67,7 +68,7 @@ class AddRefTests(unittest.TestCase):
     def test_ref_is_added_correctly_when_buffer_is_empty(self):
         buffer = ['']
 
-        new_cursor = add_ref(buffer, cursor=(0, 0), ref_url='URL')
+        new_cursor = add_ref(buffer, cursor=(0, 0), ref_or_url='URL')
 
         self.assertEqual(
             buffer,
@@ -84,7 +85,7 @@ class AddRefTests(unittest.TestCase):
         buffer = ['look at ']
         #                 ^
 
-        new_cursor = add_ref(buffer, cursor=(0, 7), ref_url='URL')
+        new_cursor = add_ref(buffer, cursor=(0, 7), ref_or_url='URL')
 
         self.assertEqual(
             buffer,
@@ -101,7 +102,7 @@ class AddRefTests(unittest.TestCase):
         buffer = ['look at .']
         #                 ^
 
-        new_cursor = add_ref(buffer, cursor=(0, 7), ref_url='URL')
+        new_cursor = add_ref(buffer, cursor=(0, 7), ref_or_url='URL')
 
         self.assertEqual(
             buffer,
@@ -123,7 +124,7 @@ class AddRefTests(unittest.TestCase):
             '[1] URL1'
         ]
 
-        new_cursor = add_ref(buffer, cursor=(1, 12), ref_url='URL2')
+        new_cursor = add_ref(buffer, cursor=(1, 12), ref_or_url='URL2')
 
         self.assertEqual(
             buffer,
@@ -147,7 +148,7 @@ class AddRefTests(unittest.TestCase):
             '',
         ]
 
-        new_cursor = add_ref(buffer, cursor=(0, 11), ref_url='URL2')
+        new_cursor = add_ref(buffer, cursor=(0, 11), ref_or_url='URL2')
 
         self.assertEqual(
             buffer,
@@ -165,7 +166,7 @@ class AddRefTests(unittest.TestCase):
         buffer = ['look at.']
         #                ^
 
-        new_cursor = add_ref(buffer, cursor=(0, 6), ref_url='URL')
+        new_cursor = add_ref(buffer, cursor=(0, 6), ref_or_url='URL')
 
         self.assertEqual(
             buffer,
@@ -182,7 +183,7 @@ class AddRefTests(unittest.TestCase):
         buffer = ['look at.']
         #               ^
 
-        new_cursor = add_ref(buffer, cursor=(0, 5), ref_url='URL')
+        new_cursor = add_ref(buffer, cursor=(0, 5), ref_or_url='URL')
 
         self.assertEqual(
             buffer,
@@ -199,7 +200,7 @@ class AddRefTests(unittest.TestCase):
         buffer = ['look at.']
         #                 ^
 
-        new_cursor = add_ref(buffer, cursor=(0, 7), ref_url='URL')
+        new_cursor = add_ref(buffer, cursor=(0, 7), ref_or_url='URL')
 
         self.assertEqual(
             buffer,
@@ -216,7 +217,7 @@ class AddRefTests(unittest.TestCase):
         buffer = ['look at 3f5-4_2.']
         #                    ^
 
-        new_cursor = add_ref(buffer, cursor=(0, 10), ref_url='URL')
+        new_cursor = add_ref(buffer, cursor=(0, 10), ref_or_url='URL')
 
         self.assertEqual(
             buffer,
@@ -233,7 +234,7 @@ class AddRefTests(unittest.TestCase):
         buffer = ['look at .']
         #                  ^
 
-        new_cursor = add_ref(buffer, cursor=(0, 8), ref_url='URL')
+        new_cursor = add_ref(buffer, cursor=(0, 8), ref_or_url='URL')
 
         self.assertEqual(
             buffer,
@@ -255,7 +256,7 @@ class AddRefTests(unittest.TestCase):
             '[1] URL1'
         ]
 
-        new_cursor = add_ref(buffer, cursor=(1, 12), ref_url='URL1')
+        new_cursor = add_ref(buffer, cursor=(1, 12), ref_or_url='URL1')
 
         self.assertEqual(
             buffer,
@@ -276,7 +277,7 @@ class AddRefTests(unittest.TestCase):
             ''
         ]
 
-        new_cursor = add_ref(buffer, cursor=(0, 7), ref_url='URL')
+        new_cursor = add_ref(buffer, cursor=(0, 7), ref_or_url='URL')
 
         self.assertEqual(
             buffer,
@@ -297,7 +298,7 @@ class AddRefTests(unittest.TestCase):
             'Signature'
         ]
 
-        new_cursor = add_ref(buffer, cursor=(0, 7), ref_url='URL')
+        new_cursor = add_ref(buffer, cursor=(0, 7), ref_or_url='URL')
 
         self.assertEqual(
             buffer,
@@ -322,7 +323,7 @@ class AddRefTests(unittest.TestCase):
             'Signature'
         ]
 
-        new_cursor = add_ref(buffer, cursor=(0, 7), ref_url='URL')
+        new_cursor = add_ref(buffer, cursor=(0, 7), ref_or_url='URL')
 
         self.assertEqual(
             buffer,
@@ -337,6 +338,100 @@ class AddRefTests(unittest.TestCase):
             ]
         )
         self.assertEqual(new_cursor, (0, 10))
+
+    def test_adds_reference_when_ref_or_url_is_reference(self):
+        buffer = [
+            'look at [1].',
+            'Also look at .',
+            #            ^
+            '',
+            '[1] URL1'
+        ]
+
+        new_cursor = add_ref(buffer, cursor=(1, 12), ref_or_url='[1]')
+
+        self.assertEqual(
+            buffer,
+            [
+                'look at [1].',
+                'Also look at [1].',
+                #               ^
+                '',
+                '[1] URL1'
+            ]
+        )
+        self.assertEqual(new_cursor, (1, 15))
+
+    def test_adds_reference_when_ref_or_url_is_reference_number(self):
+        buffer = [
+            'look at [1].',
+            'Also look at .',
+            #            ^
+            '',
+            '[1] URL1'
+        ]
+
+        new_cursor = add_ref(buffer, cursor=(1, 12), ref_or_url='1')
+
+        self.assertEqual(
+            buffer,
+            [
+                'look at [1].',
+                'Also look at [1].',
+                #               ^
+                '',
+                '[1] URL1'
+            ]
+        )
+        self.assertEqual(new_cursor, (1, 15))
+
+
+class GetRefsWithUrlsForMenuTests(unittest.TestCase):
+    def test_return_empty_list_when_there_are_no_references(self):
+        buffer = []
+
+        refs_with_urls = get_refs_with_urls_for_menu(buffer)
+
+        self.assertEqual(refs_with_urls, [])
+
+    def test_returns_correct_list_when_there_are_references(self):
+        buffer = [
+            'look at [1].',
+            'also look at [2].',
+            '',
+            '[1] url1',
+            '[2] url2'
+        ]
+
+        refs_with_urls = get_refs_with_urls_for_menu(buffer)
+
+        self.assertEqual(
+            refs_with_urls,
+            [
+                '[1] url1',
+                '[2] url2'
+            ]
+        )
+
+    def test_returns_correct_list_when_there_is_signature(self):
+        buffer = [
+            'look at [1].',
+            '',
+            '[1] url1',
+            '',
+            '-- ',
+            'Signature',
+            '[5] xxx'
+        ]
+
+        refs_with_urls = get_refs_with_urls_for_menu(buffer)
+
+        self.assertEqual(
+            refs_with_urls,
+            [
+                '[1] url1'
+            ]
+        )
 
 
 class FixMailRefsTests(unittest.TestCase):

@@ -41,22 +41,54 @@ endfunction
 
 function! AddMailRef()
 	let ref_url = input('Enter URL: ')
-	if ref_url == ''
-		return
+	if ref_url != ''
+		call AddMailRefOrUrl(ref_url)
 	endif
+endfunction
+
+
+function! AddMailRefFromMenu()
+	let ref = GetRefFromMenuWithRefsWithUrls()
+	if ref != ''
+		call AddMailRefOrUrl(ref)
+	endif
+endfunction
+
+
+function! AddMailRefOrUrl(ref_or_url)
 	let [row, col] = GetCursorPosForPython()
 
 python3 << END
 row, col = vim_mail_refs.add_ref(
 	vim.current.buffer,
 	(int(vim.eval('l:row')), int(vim.eval('l:col'))),
-	vim.eval('l:ref_url')
+	vim.eval('a:ref_or_url')
 )
 vim.command('let row = {}'.format(row))
 vim.command('let col = {}'.format(col))
 END
 
 	call SetCursorPosInVim(row, col)
+endfunction
+
+
+function! GetRefFromMenuWithRefsWithUrls()
+python3 << END
+refs_with_urls = vim_mail_refs.get_refs_with_urls_for_menu(
+	vim.current.buffer
+)
+vim.command('let refs_with_urls = {}'.format(refs_with_urls))
+END
+
+	echohl Title
+	echo 'Existing references:'
+	echohl None
+	for ref_with_url in refs_with_urls
+		echo ref_with_url
+	endfor
+	echo ''
+	let ref = input('Select reference: ')
+	return ref
 endfunction
 
 
@@ -77,6 +109,7 @@ endfunction
 
 
 command! AddMailRef call AddMailRef()
+command! AddMailRefFromMenu call AddMailRefFromMenu()
 command! FixMailRefs call FixMailRefs()
 
 let loaded_vim_mail_refs = 1
