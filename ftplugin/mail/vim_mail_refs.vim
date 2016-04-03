@@ -41,6 +41,9 @@ endfunction
 
 function! AddMailRef()
 	let ref_url = input('Enter URL: ')
+	if ref_url == ''
+		return
+	endif
 	let [row, col] = GetCursorPosForPython()
 
 python3 << END
