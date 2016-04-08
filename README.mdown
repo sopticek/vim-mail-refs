@@ -1,0 +1,89 @@
+# vim-mail-refs #
+
+A Vim plugin for automatic insertion of URL references into mails:
+```
+Hi Dave,
+
+take a look at [1].
+
+[1] https://github.com/sopticek/vim-mail-refs
+
+```
+
+## Requirements ##
+
+Vim must be compiled with Python 3 support. To check it, run:
+```
+:echo has("python3")
+```
+
+## Installation ##
+
+A recommended way to install this plugin is via
+[pathogen](https://github.com/tpope/vim-pathogen). Clone this repository into
+your `bundle` directory:
+
+```
+$ git clone https://github.com/sopticek/vim-mail-refs ~/.vim/bundle/vim-mail-refs
+```
+
+## Usage ##
+
+This plugin defines three commands.
+
+The first command is `AddMailRef`. After executing `:AddMailRef`, you will be
+asked to enter a URL. Then, a reference to this URL will be added into the
+current cursor position in the mail body, including adding the URL to the end
+of the mail body before the signature (if any). If the current cursor position
+is inside a word (anything with letters, numbers, underscores and hyphens), the
+reference will be added after this word and separated by a single space.
+
+![AddMailRef](screenshots/AddMailRef.gif)
+
+The second command is `AddMailRefFromMenu`. It is useful if you want to reuse
+an already existing reference. After executing `:AddMailRefFromMenu`, you will
+be asked to select a reference from the shown menu. There are two ways to
+select this reference. Either write just the reference number (e.g. `1`) or put
+it inside square brackets (e.g. `[1]`).
+
+![AddMailRefFromMenu](screenshots/AddMailRefFromMenu.gif)
+
+The last command, `FixMailRefs`, normalizes all references used in the mail.
+The following actions are performed:
+* unused references are removed,
+* references are renumbered by their order of appearance in the buffer ([1],
+  [2], ...).
+
+![FixMailRefs](screenshots/FixMailRefs.gif)
+
+To simplify the use of this plugin, it is recommended to create mappings for
+the commands. For example:
+```
+au FileType mail nnoremap <buffer> <Leader>ar :AddMailRef<CR>
+au FileType mail nnoremap <buffer> <Leader>aR :AddMailRefFromMenu<CR>
+au FileType mail nnoremap <buffer> <Leader>fr :FixMailRefs<CR>
+```
+
+## Testing ##
+
+The Python part of the plugin's code is covered by unit tests. To execute them,
+simply run `make tests`. It will run the tests by using
+[nosetests](https://nose.readthedocs.org/en/latest/), so make sure you have it
+installed.
+
+If you want to generate code coverage, run `make tests-coverage` and open
+`coverage/index.html` in your favorite web browser. Once again, you need to
+have [nosetests](https://nose.readthedocs.org/en/latest/) installed.
+
+## Notes ##
+
+This plugin is in no way perfect, but it meets my needs very well. Therefore,
+it may be useful for you too. Your feedback, suggestions, bug reports, patches,
+simply anything that can help me to improve this plugin is welcomed!
+
+## Copyright and License ##
+
+Copyright (c) 2016 Daniela Ďuričeková <daniela.duricekova@gmail.com> and
+contributors
+
+Distributed under the MIT license. See the LICENSE file for more details.
