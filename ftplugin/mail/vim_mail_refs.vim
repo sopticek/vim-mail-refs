@@ -17,11 +17,15 @@ function! s:GetCursorPosForPython()
 	" column number, which is what we want. The only caveat is that we have to
 	" first set 'tabstop' to 1 to ensure that a tab is counted as a single
 	" character. After we obtain the column, we restore the original value of
-	" 'tabstop'.
+	" 'tabstop'. We also need to disable 'linebreak' to ensure that
+	" virtcol('.') returns a correct value.
 	let row = line('.')
 	let old_tabstop = &tabstop
 	set tabstop=1
+	let old_linebreak = &linebreak
+	set nolinebreak
 	let col = virtcol('.')
+	let &linebreak = old_linebreak
 	let &tabstop = old_tabstop
 	return [row - 1, col - 1]
 endfunction
