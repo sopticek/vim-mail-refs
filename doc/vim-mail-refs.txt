@@ -4,7 +4,7 @@ vim-mail-refs.txt	For Vim version 7.4	Last change: 2016 April 10
                              Reference Manual~
 
 ===============================================================================
-CONTENTS                                                 *vim-mail-refs-contents*
+CONTENTS                                             *vim-mail-refs-contents*
 
     1. Intro .......................................... |vim-mail-refs-intro|
     2. Requirements ............................ |vim-mail-refs-requirements|
