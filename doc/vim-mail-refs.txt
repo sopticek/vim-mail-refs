@@ -1,0 +1,85 @@
+vim-mail-refs.txt	For Vim version 7.4	Last change: 2016 April 10
+*vim-mail-refs*
+
+                             Reference Manual~
+
+===============================================================================
+CONTENTS                                                 *vim-mail-refs-contents*
+
+    1. Intro .......................................... |vim-mail-refs-intro|
+    2. Requirements ............................ |vim-mail-refs-requirements|
+    3. Usage .......................................... |vim-mail-refs-usage|
+    4. About .......................................... |vim-mail-refs-about|
+    5. Licence ...................................... |vim-mail-refs-licence|
+
+===============================================================================
+1. Intro                                                *vim-mail-refs-intro*
+
+A Vim plugin for automatic insertion of URL references into mails: >
+
+    Hi Dave,
+
+    take a look at [1].
+
+    [1] https://github.com/sopticek/vim-mail-refs
+<
+===============================================================================
+2. Requirements                                  *vim-mail-refs-requirements*
+
+Vim must be compiled with Python 3 support. To check it, run: >
+
+    :echo has("python3")
+<
+
+===============================================================================
+3. Usage                                                *vim-mail-refs-usage*
+
+This plugin defines three commands.
+
+:AddMailRef                                        *vim-mail-refs-AddMailRef*
+
+The first command is |AddMailRef|. After executing it, you will be asked to
+enter a URL. Then, a reference to this URL will be added into the current
+cursor position in the mail body, including adding the URL to the end of the
+mail body before the signature (if any). If the current cursor position is
+inside a word (anything with letters, numbers, underscores and hyphens), the
+reference will be added after this word and separated by a single space.
+
+:AddMailRefFromMenu                         *vim-mail-refs-AddMailRefFromMenu*
+
+The second command is |AddMailRefFromMenu|. It is useful if you want to reuse
+an already existing reference. After executing it, you will be asked to select
+a reference from the shown menu. There are two ways to select this reference.
+Either write just the reference number (e.g. 1) or put it inside square
+brackets (e.g. [1]).
+
+:FixMailRefs                                       *vim-mail-refs-FixMailRefs*
+
+The last command, |FixMailRefs|, normalizes all references used in the mail.
+The following actions are performed:
+* unused references are removed,
+* references are renumbered by their order of appearance in the buffer ([1],
+  [2], ...).
+
+To simplify the use of this plugin, it is recommended to create mappings for
+the commands. For example: >
+
+    au FileType mail nnoremap <buffer> <Leader>ar :AddMailRef<CR>
+    au FileType mail nnoremap <buffer> <Leader>aR :AddMailRefFromMenu<CR>
+    au FileType mail nnoremap <buffer> <Leader>fr :FixMailRefs<CR>
+<
+
+===============================================================================
+4. About                                                *vim-mail-refs-about*
+
+Find the latest version of this plugin at:
+
+    https://github.com/sopticek/vim-mail-refs
+
+===============================================================================
+5. Licence                                            *vim-mail-refs-licence*
+
+Copyright (c) 2016 Daniela Ďuričeková <daniela.duricekova@gmail.com> and
+contributors
+
+Distributed under the MIT license. See the LICENSE file for more details.
