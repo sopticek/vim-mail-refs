@@ -1,3 +1,10 @@
+#
+# Project:   vim-mail-refs
+# Copyright: (c) 2016 by Daniela Ďuričeková <daniela.duricekova@gmail.com>
+#            and contributors
+# License:   MIT, see the LICENSE file for more details
+#
+
 import unittest
 
 from vim_mail_refs import Ref
