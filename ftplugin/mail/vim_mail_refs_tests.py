@@ -1,6 +1,6 @@
 #
 # Project:   vim-mail-refs
-# Copyright: (c) 2016 by Daniela Ďuričeková <daniela.duricekova@gmail.com>
+# Copyright: (c) 2016 by Daniela Ďuričeková <daniela.duricekova@protonmail.com>
 #            and contributors
 # License:   MIT, see the LICENSE file for more details
 #

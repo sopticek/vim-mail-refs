@@ -83,7 +83,7 @@ simply anything that can help me to improve this plugin is welcomed!
 
 ## Copyright and License ##
 
-Copyright (c) 2016 Daniela Ďuričeková <daniela.duricekova@gmail.com> and
+Copyright (c) 2016 Daniela Ďuričeková <daniela.duricekova@protonmail.com> and
 contributors
 
 Distributed under the MIT license. See the LICENSE file for more details.

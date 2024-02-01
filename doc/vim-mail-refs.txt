@@ -79,7 +79,7 @@ Find the latest version of this plugin at:
 ===============================================================================
 5. Licence                                            *vim-mail-refs-licence*
 
-Copyright (c) 2016 Daniela Ďuričeková <daniela.duricekova@gmail.com> and
+Copyright (c) 2016 Daniela Ďuričeková <daniela.duricekova@protonmail.com> and
 contributors
 
 Distributed under the MIT license. See the LICENSE file for more details.
